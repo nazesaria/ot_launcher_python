@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Other
+qt_designer/
+tempCodeRunnerFile.py
