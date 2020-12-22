@@ -7,6 +7,7 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+.vscode/
 .Python
 build/
 develop-eggs/
@@ -129,5 +130,6 @@ dmypy.json
 .pyre/
 
 # Other
-qt_designer/
+other/
 tempCodeRunnerFile.py
+mysql.py
