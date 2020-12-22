@@ -33,11 +33,11 @@ class Launcher:
         _compcolor = '#d9d9d9' # X11 color: 'gray85'
         _ana1color = '#d9d9d9' # X11 color: 'gray85'
         _ana2color = '#ececec' # Closest X11 color: 'gray92'
-        self.buttons_img['check'] = PhotoImage(file='./other/check_button.png')
-        self.buttons_img['update'] = PhotoImage(file='./other/update_button.png')
-        self.buttons_img['done'] = PhotoImage(file='./other/play_button.png')
+        self.buttons_img['check'] = PhotoImage(file='data/check_button.png')
+        self.buttons_img['update'] = PhotoImage(file='data/update_button.png')
+        self.buttons_img['done'] = PhotoImage(file='data/play_button.png')
 
-        self.local_dict = self.loadFromJson("config.json")
+        self.local_dict = self.loadFromJson("data/config.json")
 
         self.style = ttk.Style()
         if sys.platform == "win32":
@@ -53,7 +53,7 @@ class Launcher:
         root.resizable(1, 1)
         root.title("{} - Launcher".format(self.local_dict['Server Name']))
         root.configure(relief="groove")
-        root.configure(background="#673434")
+        root.configure(background="#303030")
         root.resizable(width=False, height=False) # Proibe o redimensionamento da janela.
 
         self.menubar = Menu(root,font="TkMenuFont",bg=_bgcolor,fg=_fgcolor)
@@ -62,20 +62,42 @@ class Launcher:
         self.TProgressbar = ttk.Progressbar(root, style='green.Horizontal.TProgressbar', length="682", value=self.progress)
         self.TProgressbar.place(relx=0.025, rely=0.92, relwidth=0.85, relheight=0.0, height=22)
 
-        self.Label1 = Label(root, text='Current Version: {}'.format(self.local_dict['Version']), background="#673434")
+        self.Label1 = Label(root, text='Current Version: {}'.format(self.local_dict['Version']), background="#303030")
         self.Label1.place(relx=0.025, rely=0.88, height=18, width=700)
-        self.Label1.configure(disabledforeground="#a3a3a3", foreground="#000000")
+        self.Label1.configure(disabledforeground="#a3a3a3", foreground="#ffffff")
         self.Label1.configure(justify=LEFT, anchor="w") # Posição texto
 
-        self.Frame1 = Frame(root)
+        self.Frame1 = Frame(root, width=760,height=388)
         self.Frame1.place(relx=0.025, rely=0.08, relheight=0.78, relwidth=0.95)
         self.Frame1.configure(relief='flat')
         self.Frame1.configure(borderwidth="2", background="#813e27")
+
+        self.Canvas = Canvas(self.Frame1, relief='flat')
+        self.Canvas.configure(borderwidth="0", background="#000000", scrollregion=(0,0,0,1000))
+
+        self.VScrollBar = Scrollbar(self.Frame1,orient=VERTICAL)
+        self.VScrollBar.pack(side=RIGHT,fill=Y)
+        self.VScrollBar.config(command=self.Canvas.yview)
+
+        self.Canvas.config(width=760,height=388)
+        self.Canvas.config(yscrollcommand=self.VScrollBar.set)
+        self.Canvas.pack(side = LEFT, expand = True, fill = BOTH)
+        self.Canvas.bind('<Enter>', self._bound_to_mousewheel)
+        self.Canvas.bind('<Leave>', self._unbound_to_mousewheel)
 
         self.Button1 = Button(root, command=self.checkUpdate, image = self.buttons_img['check'], text=self.buttons[0], state='active', pady="0", highlightbackground="#d9d9d9", foreground="#000000", disabledforeground="#a3a3a3", background="#673434", activeforeground="#000000", activebackground="#ececec")
         self.Button1.place(relx=0.888, rely=0.92, height=24, width=70)
         self.Button1.configure(relief=GROOVE)
         root.mainloop()
+
+    def _bound_to_mousewheel(self, event):
+        self.Canvas.bind_all("<MouseWheel>", self._on_mousewheel)   
+
+    def _unbound_to_mousewheel(self, event):
+        self.Canvas.unbind_all("<MouseWheel>")
+
+    def _on_mousewheel(self, event):
+        self.Canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
     def downloadArchive(self, url, endereco=None):
         if endereco is None:
