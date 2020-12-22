@@ -4,9 +4,17 @@ import tkinter.ttk as ttk
 import json
 import os
 import requests
+import shutil
+from threading import Thread
+from zipfile import ZipFile
 
-import pymysql.cursors
-# https://github.com/nazesaria/ot_launcher_python/archive/main.zip
+# Link para o update.zip
+URL_UPDATE = 'https://baiak-ilusion.com/downloads/Baiak Ilusion Client Old.zip'
+# Link para o server_info.json
+URL_SERVER_INFO = 'https://raw.githubusercontent.com/nazesaria/ot_launcher_python/main/launcher_update/server_info.json'
+# Senha .zip se existir no lugar de 123456, ou deixe como está
+ZIP_PWD = b'123456'
+
 # Execução do Launcher
 class Launcher:
 
@@ -15,6 +23,7 @@ class Launcher:
     progress = 100
     buttons = ["Check", "Update", "Done!"]
     buttons_img = {'check': '', 'update': '', 'done': ''}
+    receive_bytes = 0
 
     def __init__(self, root=Tk()):
         '''This class configures and populates the toplevel window.
@@ -53,8 +62,8 @@ class Launcher:
         self.TProgressbar = ttk.Progressbar(root, style='green.Horizontal.TProgressbar', length="682", value=self.progress)
         self.TProgressbar.place(relx=0.025, rely=0.92, relwidth=0.85, relheight=0.0, height=22)
 
-        self.Label1 = Label(root, text='Update Version: {}'.format(self.local_dict['Version']), background="#673434")
-        self.Label1.place(relx=0.025, rely=0.88, height=18, width=200)
+        self.Label1 = Label(root, text='Current Version: {}'.format(self.local_dict['Version']), background="#673434")
+        self.Label1.place(relx=0.025, rely=0.88, height=18, width=700)
         self.Label1.configure(disabledforeground="#a3a3a3", foreground="#000000")
         self.Label1.configure(justify=LEFT, anchor="w") # Posição texto
 
@@ -73,23 +82,87 @@ class Launcher:
             endereco = os.path.basename(url.split("?")[0])
         resposta = requests.get(url, stream=True)
         if resposta.status_code == requests.codes.OK:
-            with open('_tmp/{}'.format(endereco), 'wb') as novo_arquivo:
+            if not os.path.exists('_tmp'):
+                os.mkdir('_tmp')
+            with open(f'_tmp/{endereco}', 'wb') as novo_arquivo:
                 for parte in resposta.iter_content(chunk_size=256):
                     novo_arquivo.write(parte)
-            print("Download finalizado. Arquivo salvo em: {}".format(endereco))
+            return True
         else:
-            resposta.raise_for_status()
+            return False
 
     def makeRedeDict(self):
-        self.downloadArchive('https://raw.githubusercontent.com/nazesaria/ot_launcher_python/main/main.py')
+        try:
+            assert self.downloadArchive(URL_SERVER_INFO) == True
+            self.rede_dict = self.loadFromJson('_tmp/server_info.json')
+        except AssertionError:
+            self.Label1['text'] = "Communication problem with the network when checking for update."
+            self.Button1['image'] = self.buttons_img['done']
+            self.Button1['command'] = self.playGame
+            shutil.rmtree('./_tmp/', ignore_errors=True)
 
     def checkUpdate(self):
         self.makeRedeDict()
-        # new_version = 1.002
-        # if new_version > self.local_dict['Version']:
-        #     self.Button1['image'] = self.buttons_img['update']
-        # else:
-        #     self.Button1['image'] = self.buttons_img['done']
+        try:
+            if self.rede_dict['Version'] > self.local_dict['Version']:
+                self.Button1['image'] = self.buttons_img['update']
+                self.Button1['command'] = self.threadDownlaod
+                self.TProgressbar['value'] = 0
+                self.Label1['text'] = f"New Version Available: {self.rede_dict['Version']} "
+            else:
+                self.Button1['image'] = self.buttons_img['done']
+                self.Button1['command'] = self.playGame
+                shutil.rmtree('./_tmp/', ignore_errors=True)
+        except KeyError:
+            self.Label1['text'] = "Impossible to get value for new versions. Try restarting the launcher or communicating support."
+            self.Button1['image'] = self.buttons_img['done']
+            self.Button1['command'] = self.playGame
+            shutil.rmtree('./_tmp/', ignore_errors=True)
+
+    def threadDownlaod(self):
+        self.Button1['state'] = DISABLED
+        Thread(target = self.downloadUpdate).start()
+
+    def downloadUpdate(self):
+        response = requests.get(URL_UPDATE, stream=True)
+        download = False
+        if response.status_code == requests.codes.OK:
+            if not os.path.exists('_tmp'):
+                os.mkdir('_tmp')
+            total_length = response.headers.get('content-length')
+            # total_length = None
+            with open('_tmp/update.zip', 'wb') as novo_arquivo:
+                if total_length is None: # no content length header
+                    total_length = 0
+                else:
+                    dl = 0
+                    total_length = int(total_length)
+                    for parte in response.iter_content(chunk_size=1024):
+                        dl += len(parte)
+                        self.TProgressbar['value'] = int(dl/total_length*100)
+                        self.Label1['text'] = f"Downloading: {(dl/1000000):.2f}/{(total_length/1000000):.2f} Mbs, {self.TProgressbar['value']}%"
+                        novo_arquivo.write(parte)
+                    download = True
+        if download:
+            self.Label1['text'] = "Waiting for updates to be installed."
+            self.descompactUpdate()
+        else:
+            self.Label1['text'] = "Communication problem with the network when checking for update."
+            self.Button1['image'] = self.buttons_img['done']
+            self.Button1['command'] = self.playGame
+            self.Button1['state'] = ACTIVE
+
+    def descompactUpdate(self):
+        update = ZipFile('./_tmp/update.zip', 'r')
+        update.extractall('.', pwd=ZIP_PWD)
+        update.close()
+        self.local_dict['Version'] = self.rede_dict['Version']
+        self.writeDictFromJson('config.json')
+        self.Button1['image'] = self.buttons_img['done']
+        self.Button1['command'] = self.playGame
+        self.Button1['state'] = ACTIVE
+        self.Label1['text'] = f"Current Version: {self.rede_dict['Version']}"
+        shutil.rmtree('./_tmp/', ignore_errors=True)
 
     def loadFromJson(self, file):
         with open(file, 'r') as archive:
@@ -100,7 +173,7 @@ class Launcher:
         with open(file, 'w') as arquivo:
             arquivo.write(json.dumps(self.local_dict, indent=2))
 
-    def progressBarValue():
-        pass
+    def playGame(self):
+        print('playGame')
 
 launcher = Launcher()
