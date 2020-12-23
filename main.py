@@ -1,4 +1,5 @@
 from tkinter import *
+from const import *
 import tkinter.font as tkFont
 import sys
 import tkinter.ttk as ttk
@@ -10,32 +11,6 @@ import pygetwindow as gw
 from threading import Thread
 from zipfile import ZipFile
 
-# Link para o update.zip
-URL_UPDATE = 'https://baiak-ilusion.com/downloads/Baiak Ilusion Client Old.zip'
-# Link para o server_info.json
-URL_SERVER_INFO = 'https://raw.githubusercontent.com/nazesaria/ot_launcher_python/main/launcher_update/server_info.json'
-# Link para o patch_note.json
-URL_PATCH_NOTE = 'https://raw.githubusercontent.com/nazesaria/ot_launcher_python/main/launcher_update/patch_note.json'
-# Senha .zip se existir no lugar de 123456, ou deixe como está
-ZIP_PWD = b'123456'
-# Fundo Principal
-BACKGROUND_1 = '#303030'
-# Fundo do Canvas
-BACKGROUND_2 = '#000000'
-# Cor dos Status Update
-STATUS_COLOR = '#ffffff'
-# Nome da foto dentro do Canvas
-PATCH_LOGO = 'patch_logo.png'
-
-MSG = {
-    'ERROR_PATCH_NOTE': 'Error: Not Possible Load Patch Notes!',
-    'ERROR_CHECK_UPDATE': 'Communication problem with the network when checking for update.',
-    'ERROR_GET_VERSION': 'Impossible to get value for new versions. Try restarting the launcher or communicating support.',
-    'ERROR_DOWNLOADING': 'Communication problem with the network when checking for update.'
-}
-
-
-# Execução do Launcher
 class Launcher:
 
     local_dict = {}
@@ -47,39 +22,31 @@ class Launcher:
     receive_bytes = 0
 
     def __init__(self, root=Tk()):
-        '''This class configures and populates the toplevel window.
-           top is the toplevel containing window.'''
-        _bgcolor = '#d9d9d9'  # X11 color: 'gray85'
-        _fgcolor = '#000000'  # X11 color: 'black'
-        _compcolor = '#d9d9d9' # X11 color: 'gray85'
-        _ana1color = '#d9d9d9' # X11 color: 'gray85'
-        _ana2color = '#ececec' # Closest X11 color: 'gray92'
         self.buttons_img['check'] = PhotoImage(file='data/check_button.png')
         self.buttons_img['update'] = PhotoImage(file='data/update_button.png')
         self.buttons_img['done'] = PhotoImage(file='data/play_button.png')
         self.patch_logo = PhotoImage(file=f'data/{PATCH_LOGO}')
+        self.logo_top = PhotoImage(file=f'data/{LOGO_TOP}')
         self.local_dict = self.loadFromJson("data/config.json")
 
         self.style = ttk.Style()
         if sys.platform == "win32":
             self.style.theme_use('winnative')
-        self.style.configure('.',background=_bgcolor)
-        self.style.configure('.',foreground=_fgcolor)
-        self.style.map('.',background=[('selected', _compcolor), ('active',_ana2color)])
         self.style.configure("green.Horizontal.TProgressbar", background='green') # Cor da barra de progresso.
 
-
-        root.geometry("800x500+400+200")
-        # root.overrideredirect(True)
-        # root.attributes('-fullscreen',True)
+        root.geometry(f"{SIZE_SCREEN}+400+200")
         root.resizable(1, 1)
-        root.title('launcher python')
-        # root.update()
+        root.title('{} - Launcher'.format(self.local_dict['Server Name']))
+        self.window = root
         root.configure(relief="groove")
         root.configure(background=BACKGROUND_1)
         root.resizable(width=False, height=False) # Proibe o redimensionamento da janela.
+        # self.window = gw.getWindowsWithTitle('launcher python')[0]
+        # root.overrideredirect(True)
+        # root.attributes('-fullscreen',True)
+        # root.update()
 
-        self.menubar = Menu(root,font="TkMenuFont",bg=_bgcolor,fg=_fgcolor)
+        self.menubar = Menu(root, font = "TkMenuFont", bg = '#d9d9d9', fg = '#000000')
         root.configure(menu = self.menubar)
 
         self.TProgressbar = ttk.Progressbar(root, style='green.Horizontal.TProgressbar', length="682", value=self.progress)
@@ -87,7 +54,6 @@ class Launcher:
 
         self.Label1 = Text(root, background=BACKGROUND_1, font=("Arial", "9", "bold"), foreground = STATUS_COLOR)
         self.Label1.place(relx=0.025, rely=0.87, height=25, width=700)
-        # self.Label1.configure(disabledforeground="#a3a3a3", foreground="#ffffff")
         self.Label1.insert(END, 'Current Version: {}'.format(self.local_dict['Version']))
         self.Label1.configure(relief = 'flat', state = DISABLED) # Posição texto
 
@@ -100,8 +66,8 @@ class Launcher:
         self.Canvas.configure(borderwidth="0", background=BACKGROUND_2)
 
         self.VScrollBar = Scrollbar(self.Frame1, orient = VERTICAL, background = '#000000', bd = 0,  troughcolor='#000000', highlightcolor = '#000000', highlightbackground='#000000')
-        # self.VScrollBar.pack(side = RIGHT, fill = Y) # Ativar Barra de Scroll
         self.VScrollBar.config(command=self.Canvas.yview)
+        # self.VScrollBar.pack(side = RIGHT, fill = Y) # Ativar Barra de Scroll
 
         self.Canvas.config(width = 760, height = 345)
         self.Canvas.config(yscrollcommand=self.VScrollBar.set)
@@ -109,7 +75,10 @@ class Launcher:
         self.Canvas.bind('<Enter>', self._bound_to_mousewheel)
         self.Canvas.bind('<Leave>', self._unbound_to_mousewheel)
 
-        self.PatchLogo = Label(root, image=self.patch_logo, background='#000000')
+        self.LogoTop = Label(root, image=self.logo_top, background=BACKGROUND_1)
+        self.LogoTop.place(relx = 0.1, rely = 0.0001, relheight = 0.15, relwidth = 0.8)
+
+        self.PatchLogo = Label(root, image=self.patch_logo, background=BACKGROUND_2)
         self.PatchLogo.place(relx = 0.55, rely = 0.158, relheight = 0.685, relwidth = 0.42)
 
         self.Credit = Message(root, text = '''Launcher created by Naze#3578.''', width = 250, bg = BACKGROUND_1, foreground = '#464646', highlightbackground = '#d9d9d9', highlightcolor = '#000000')
@@ -119,7 +88,7 @@ class Launcher:
         self.ButtonUpdate.place(relx=0.888, rely=0.92, height=24, width=70)
         self.ButtonUpdate.configure(relief=GROOVE)
 
-        # self.window = gw.getWindowsWithTitle('launcher python')[0]
+        # Button Close e Minimize Dentro da Janela
         # self.ButtonClose = Button(root, command = self.window.close, text = 'X', state = NORMAL, relief = RAISED, background = BACKGROUND_1, activebackground="#000000", foreground='#ffffff', activeforeground="#ffffff")
         # self.ButtonClose.place(relx=0.96, rely=0.001, height=20, width=30)
         # self.ButtonMinimize = Button(root, command = self.window.minimize, text = '-', state = NORMAL, relief = RAISED, background = BACKGROUND_1, activebackground="#000000", foreground='#ffffff', activeforeground="#ffffff")
@@ -188,7 +157,10 @@ class Launcher:
     def downloadArchive(self, url, endereco=None):
         if endereco is None:
             endereco = os.path.basename(url.split("?")[0])
-        resposta = requests.get(url, stream=True)
+        try:
+            resposta = requests.get(url, stream=True)
+        except requests.exceptions.ConnectionError:
+            return False
         if resposta.status_code == requests.codes.OK:
             if not os.path.exists('_tmp'):
                 os.mkdir('_tmp')
@@ -255,7 +227,6 @@ class Launcher:
                         dl += len(parte)
                         self.TProgressbar['value'] = int(dl/total_length*100)
                         self.insertLabelText(f"Downloading: {(dl/1000000):.2f}/{(total_length/1000000):.2f} Mbs, {self.TProgressbar['value']}%")
-                        # self.Label1['text'] = f"Downloading: {(dl/1000000):.2f}/{(total_length/1000000):.2f} Mbs, {self.TProgressbar['value']}%"
                         novo_arquivo.write(parte)
                     download = True
         if download:
@@ -289,6 +260,11 @@ class Launcher:
             arquivo.write(json.dumps(dict, indent=2))
 
     def playGame(self):
-        print('playGame')
+        local = os.path.dirname(os.path.realpath(__file__))
+        os.chdir('game')
+        os.startfile(local + f'\game\{CLIENT_NAME}')
+        os.chdir(local)
+        if not MULTICLIENT:
+            self.window.destroy()
 
 launcher = Launcher()
