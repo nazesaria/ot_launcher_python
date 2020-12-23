@@ -15,7 +15,7 @@ URL_UPDATE = 'https://baiak-ilusion.com/downloads/Baiak Ilusion Client Old.zip'
 # Link para o server_info.json
 URL_SERVER_INFO = 'https://raw.githubusercontent.com/nazesaria/ot_launcher_python/main/launcher_update/server_info.json'
 # Link para o patch_note.json
-URL_PATCH_NOTE = 'https://raw.githubusercontent.com/nazesaria/ot_launcher_python/main/server_info.json'
+URL_PATCH_NOTE = 'https://raw.githubusercontent.com/nazesaria/ot_launcher_python/main/launcher_update/patch_note.json'
 # Senha .zip se existir no lugar de 123456, ou deixe como está
 ZIP_PWD = b'123456'
 # Fundo Principal
@@ -24,6 +24,7 @@ BACKGROUND_1 = '#303030'
 BACKGROUND_2 = '#000000'
 # Cor dos Status Update
 STATUS_COLOR = '#ffffff'
+# Nome da foto dentro do Canvas
 PATCH_LOGO = 'patch_logo.png'
 
 MSG = {
@@ -136,21 +137,23 @@ class Launcher:
             self.patch_note = self.loadFromJson('_tmp/patch_note.json')
             factor = self.sendPatchNotes(self.patch_note)
             self.Canvas.configure(scrollregion=(0, 0, 0, factor * 44))
+            shutil.rmtree('./_tmp/', ignore_errors=True)
         except AssertionError:
             self.Canvas.create_polygon([50,75,50,40,400,40,400,75], outline=BACKGROUND_1, fill='#2c2c2c', width=2)
             self.Canvas.create_text(55,42, fill=STATUS_COLOR, font="Georgia 12",text=MSG['ERROR_PATCH_NOTE'], anchor='nw', width = 350)
             self.Canvas.configure(scrollregion=(0, 0, 0, 100))
+            shutil.rmtree('./_tmp/', ignore_errors=True)
 
     def sendPatchNotes(self, dict):
         size = len(dict)
         factor = 0
         for n in range(size, 0, -1):
-            self.makePatchTitle(factor, dict[n]['tittle'])
-            size_notes = len(dict[n]['notes'])
+            self.makePatchTitle(factor, dict[str(n)]['tittle'])
+            size_notes = len(dict[str(n)]['notes'])
             for note in range(0, size_notes):
-                self.makePatchNote(factor, dict[n]['notes'][note])
+                self.makePatchNote(factor, dict[str(n)]['notes'][note])
                 factor += 1
-            self.makePatchDate(factor, dict[n]['date'])
+            self.makePatchDate(factor, dict[str(n)]['date'])
             factor += 1
             self.makePatchSeparator(factor)
             factor += 1
