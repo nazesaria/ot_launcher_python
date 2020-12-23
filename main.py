@@ -7,7 +7,6 @@ import json
 import os
 import requests
 import shutil
-import pygetwindow as gw
 from threading import Thread
 from zipfile import ZipFile
 
