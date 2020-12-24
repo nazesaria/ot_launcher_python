@@ -16,8 +16,10 @@
   -  ###### Entenda os Parametros
      `--onefile` : Arquivo sera compilado totalmente em um executavel(.exe), essa opção facilita a distribuição e criar um programa mais leve, mas em meus primeiros teste o WindowsDefender acusou como mallware ([Scan - VirusTotal](https://www.virustotal.com/gui/file/39b79df18560703ceffad558cc36a6b9b3249761100c2e2a365b9df630d502ec/detection)), mas reportei esse problema enviando o launcher e eles responderam que as definições foram atualizada para corrigir isso. Caso você precise atualizar segue o procedimento que eles me [indicaram](https://www.microsoft.com/en-us/wdsi/submission/31167ef7-4e7c-49e3-bba0-8aa5a7c75111).
 	 > 1 - Open command prompt as administrator and change directory to c:\Program Files\Windows Defender
-	2 - Run “MpCmdRun.exe -removedefinitions -dynamicsignatures”
-	3 -  Run "MpCmdRun.exe -SignatureUpdate"
+	 
+	 > 2 - Run “MpCmdRun.exe -removedefinitions -dynamicsignatures”
+	 
+	 > 3 -  Run "MpCmdRun.exe -SignatureUpdate"
 
      `--windowed` : Usado para interface graficas.
 	 
