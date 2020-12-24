@@ -1,7 +1,7 @@
 # Ot Launcher Python
 
-###Compilar usando PyInstaller:
-#####Primeiro ter instalado o Python: https://www.python.org/downloads/
+## Compilar usando PyInstaller:
+##### Primeiro ter instalado o Python: https://www.python.org/downloads/
 - #####Abrir o powershell/cmd e instalar as libs usadas:
 		pip install requests
 		pip install threaded
