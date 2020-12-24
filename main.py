@@ -1,6 +1,5 @@
 from tkinter import *
 from const import *
-import tkinter.font as tkFont
 import sys
 import tkinter.ttk as ttk
 import json
@@ -40,6 +39,7 @@ class Launcher:
         root.configure(relief="groove")
         root.configure(background=BACKGROUND_1)
         root.resizable(width=False, height=False) # Proibe o redimensionamento da janela.
+        root.iconbitmap(f'data/{LAUNCHER_ICO}')
         # self.window = gw.getWindowsWithTitle('launcher python')[0]
         # root.overrideredirect(True)
         # root.attributes('-fullscreen',True)
@@ -47,6 +47,9 @@ class Launcher:
 
         self.menubar = Menu(root, font = "TkMenuFont", bg = '#d9d9d9', fg = '#000000')
         root.configure(menu = self.menubar)
+
+        self.Credit = Message(root, text = '''Launcher created by Naze#3578.''', width = 250, bg = BACKGROUND_1, foreground = '#464646', highlightbackground = '#d9d9d9', highlightcolor = '#000000')
+        self.Credit.place(relx = 0.775, rely = 0.961, relheight = 0.040, relwidth = 0.23)
 
         self.TProgressbar = ttk.Progressbar(root, style='green.Horizontal.TProgressbar', length="682", value=self.progress)
         self.TProgressbar.place(relx=0.025, rely=0.92, relwidth=0.85, relheight=0.0, height=22)
@@ -79,9 +82,6 @@ class Launcher:
 
         self.PatchLogo = Label(root, image=self.patch_logo, background=BACKGROUND_2)
         self.PatchLogo.place(relx = 0.55, rely = 0.158, relheight = 0.685, relwidth = 0.42)
-
-        self.Credit = Message(root, text = '''Launcher created by Naze#3578.''', width = 250, bg = BACKGROUND_1, foreground = '#464646', highlightbackground = '#d9d9d9', highlightcolor = '#000000')
-        self.Credit.place(relx = 0.775, rely = 0.961, relheight = 0.040, relwidth = 0.23)
 
         self.ButtonUpdate = Button(root, command=self.checkUpdate, image = self.buttons_img['check'], text=self.buttons[0], state='active', pady="0", highlightbackground="#d9d9d9", foreground="#000000", disabledforeground="#a3a3a3", background="#673434", activeforeground="#000000", activebackground="#ececec")
         self.ButtonUpdate.place(relx=0.888, rely=0.92, height=24, width=70)

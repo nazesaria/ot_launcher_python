@@ -18,6 +18,8 @@ STATUS_COLOR = '#ffffff'
 LOGO_TOP = 'logo_top.png'
 # Nome da foto dentro do Canvas
 PATCH_LOGO = 'patch_logo.png'
+# Nome do icone
+LAUNCHER_ICO = 'launcher.ico'
 # Habilitar MC
 MULTICLIENT = True
 # Nome do Client.exe dentro da pasta 'game'
