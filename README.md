@@ -9,8 +9,8 @@
 - **Ainda no powershell/cmd ir até a pasta do repositorio ("ot_launcher_python-main") onde está o main.py.**
 
 - ###### Agora ja podera compilar mas atenção a algumas configurações.
- - ###### Alterar valor das constantes em const.py
- - ###### Caso altere imagens usada em data/ e use outros nome e formatos diferente do atual devera modificar em const.py
+    - ###### Alterar valor das constantes em const.py
+    - ###### Caso altere imagens usada em data/ e use outros nome e formatos diferente do atual devera modificar em const.py
 
 - ##### Para compilar ira mandar o seguinte comando no powershell/cmd, sendo seus parametros ajustado como preferir.
   -  ###### Entenda os Parametros
