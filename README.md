@@ -21,9 +21,9 @@
 
      `--windowed` : Usado para interface graficas.
 	 
-	`--icon="path"` : Localização do icone que sera usado no executavel.
+	 `--icon="path"` : Localização do icone que sera usado no executavel.
 	
-	`--name="name"` : Nome de saida do executavel.
+	 `--name="name"` : Nome de saida do executavel.
 	
 	> Outros parametros que podem ser usados pode ser encontrados [aqui](https://pyinstaller.readthedocs.io/en/stable/usage.html).
 	
